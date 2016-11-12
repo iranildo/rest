@@ -1,8 +1,10 @@
-package br.unipe.rest;
+package br.unipe.rest.domain;
 
 import java.io.Serializable;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -13,18 +15,20 @@ public class Time implements Serializable {
 	private static final long serialVersionUID = -7799369695818057571L;
 	
 	@Id
-	private int id;
+	private Long id;
+	
 	private String nome;
+	
 	private String estado;
 	
 	public Time() {
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -44,7 +48,7 @@ public class Time implements Serializable {
 		this.estado = estado;
 	}
 
-	public Time(int id, String nome, String estado) {
+	public Time(Long id, String nome, String estado) {
 		super();
 		this.id = id;
 		this.nome = nome;

@@ -1,8 +1,8 @@
-package br.unipe.rest;
+package br.unipe.rest.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,23 +11,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.unipe.rest.domain.Time;
+import br.unipe.rest.service.TimeService;
+
 
 @RestController
 @RequestMapping(value="/time")
 public class TimeController {
 
+	private final TimeService timeService;
+
+	@Autowired
+	public TimeController(final TimeService timeService) {
+		this.timeService = timeService;
+	}
+
 	@RequestMapping(method=RequestMethod.GET)
 	public ResponseEntity<List<Time>> listarTodosTimes() {
-		List<Time> listaTimesFake = new ArrayList<Time>();
-		listaTimesFake.add(new Time(1,"Palmeiras","SP"));
-		listaTimesFake.add(new Time(2,"Vasco","RJ"));
-		return new ResponseEntity<List<Time>>(listaTimesFake, HttpStatus.OK);
+		return new ResponseEntity<List<Time>>(timeService.listAllTimes(), HttpStatus.OK);
 
 	}
 
 	@RequestMapping(value="{identificador}", method = RequestMethod.GET)
-	public ResponseEntity<Time> obterInformacaoTime(@PathVariable(value="identificador") String id) {
-		Time timeCampeao = new Time(1,"Palmeiras","SP");
+	public ResponseEntity<Time> obterTimePorId(@PathVariable(value="identificador") Long id) {
+		Time timeCampeao = timeService.getById(id);
 		return timeCampeao == null ? 
 				new ResponseEntity<Time>(HttpStatus.NOT_FOUND) : 
 					new ResponseEntity<Time>(timeCampeao, HttpStatus.OK);	
@@ -35,21 +42,30 @@ public class TimeController {
 	
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<Time> createTime(@RequestBody Time time) {
-		try {
-			return new ResponseEntity<Time>(time, HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<Time>(time, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return saveUpdate(time);
 	}
 
 	@RequestMapping(method = RequestMethod.PUT)
 	public ResponseEntity<Time> atualizarTime(@RequestBody Time time) {
-		return new ResponseEntity<Time>(time, HttpStatus.OK);		
-	}
-	
-	@RequestMapping(method = RequestMethod.DELETE)
-	public ResponseEntity<String> excluirTime(@RequestBody Time time) {
-		return new ResponseEntity<String>(HttpStatus.OK);	
+		return saveUpdate(time);	
 	}
 
+	@RequestMapping(method = RequestMethod.DELETE)
+	public ResponseEntity<String> excluirTime(@RequestBody Time time) {
+		try {
+			timeService.delete(time);
+			return new ResponseEntity<String>(HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private ResponseEntity<Time> saveUpdate(Time time) {
+		try {
+			Time retorno = timeService.save(time);
+			return new ResponseEntity<Time>(retorno, HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<Time>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
